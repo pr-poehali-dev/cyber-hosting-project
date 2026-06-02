@@ -1,9 +1,11 @@
 import { useState } from "react";
 import Icon from "@/components/ui/icon";
+import ServerManage from "@/components/ServerManage";
 import {
   FREE_SERVER,
   claimServer,
   isServerClaimed,
+  isServerOnline,
   getUserServer,
   type Session,
 } from "@/lib/hostingStore";
@@ -13,19 +15,6 @@ interface Props {
   onLogout: () => void;
 }
 
-const inputStyle: React.CSSProperties = {
-  width: "100%",
-  background: "rgba(255,255,255,0.04)",
-  border: "1px solid rgba(147,51,234,0.2)",
-  borderRadius: "0.75rem",
-  padding: "0.75rem 1rem",
-  color: "#f1f5f9",
-  fontSize: "0.925rem",
-  outline: "none",
-  fontFamily: "Golos Text",
-  boxSizing: "border-box",
-};
-
 export default function UserDashboard({ session, onLogout }: Props) {
   const login = session?.login || "user";
   const userId = `#${Math.abs(login.split("").reduce((a, c) => a * 31 + c.charCodeAt(0), 7) % 900000 + 100000)}`;
@@ -33,18 +22,31 @@ export default function UserDashboard({ session, onLogout }: Props) {
   const [serverState, setServerState] = useState<typeof FREE_SERVER | null>(() => getUserServer(login));
   const [claimed, setClaimed] = useState<boolean>(() => isServerClaimed());
   const [pulse, setPulse] = useState(false);
+  const [managing, setManaging] = useState(false);
+  const [online, setOnline] = useState<boolean>(() => isServerOnline());
 
   const handleOrder = () => {
     if (isServerClaimed()) return;
     claimServer(login);
     setServerState({ ...FREE_SERVER });
     setClaimed(true);
+    setOnline(false);
     setPulse(true);
     setTimeout(() => setPulse(false), 1000);
   };
 
   const serverAvailable = !claimed;
   const hasMyServer = serverState !== null;
+
+  // Экран управления сервером
+  if (managing && hasMyServer) {
+    return (
+      <ServerManage
+        login={login}
+        onBack={() => { setManaging(false); setOnline(isServerOnline()); }}
+      />
+    );
+  }
 
   return (
     <div
@@ -227,22 +229,24 @@ export default function UserDashboard({ session, onLogout }: Props) {
                             width: 8,
                             height: 8,
                             borderRadius: "50%",
-                            background: "#10b981",
-                            boxShadow: "0 0 8px #10b981",
+                            background: online ? "#10b981" : "#ef4444",
+                            boxShadow: `0 0 8px ${online ? "#10b981" : "#ef4444"}`,
                             display: "inline-block",
-                            animation: "pulse-glow 2s infinite",
+                            animation: online ? "pulse-glow 2s infinite" : "none",
                           }}
                         />
-                        <span style={{ color: "#10b981", fontFamily: "Rajdhani", fontWeight: 700, fontSize: "0.875rem" }}>
-                          ВКЛЮЧЕН
+                        <span style={{ color: online ? "#10b981" : "#ef4444", fontFamily: "Rajdhani", fontWeight: 700, fontSize: "0.875rem" }}>
+                          {online ? "ВКЛЮЧЕН" : "ВЫКЛЮЧЕН"}
                         </span>
                       </span>
                     </td>
                     <td style={{ padding: "1rem" }}>
                       <button
+                        onClick={() => setManaging(true)}
+                        className="transition-all"
                         style={{
-                          background: "rgba(147,51,234,0.12)",
-                          border: "1px solid rgba(147,51,234,0.3)",
+                          background: "rgba(147,51,234,0.15)",
+                          border: "1px solid rgba(147,51,234,0.4)",
                           color: "#c084fc",
                           fontFamily: "Rajdhani",
                           fontWeight: 700,
@@ -252,6 +256,8 @@ export default function UserDashboard({ session, onLogout }: Props) {
                           borderRadius: 6,
                           cursor: "pointer",
                         }}
+                        onMouseOver={(e) => { (e.currentTarget).style.background = "rgba(147,51,234,0.3)"; (e.currentTarget).style.boxShadow = "0 0 15px rgba(147,51,234,0.4)"; }}
+                        onMouseOut={(e) => { (e.currentTarget).style.background = "rgba(147,51,234,0.15)"; (e.currentTarget).style.boxShadow = "none"; }}
                       >
                         УПРАВЛЯТЬ
                       </button>

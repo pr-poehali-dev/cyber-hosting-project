@@ -3,6 +3,7 @@ import Icon from "@/components/ui/icon";
 import {
   FREE_SERVER,
   isServerClaimed,
+  isServerOnline,
   getServerOwner,
   releaseServer,
   type Session,
@@ -16,6 +17,7 @@ interface Props {
 export default function AdminPanel({ session, onLogout }: Props) {
   const [claimed, setClaimed] = useState<boolean>(() => isServerClaimed());
   const [owner, setOwner] = useState<string | null>(() => getServerOwner());
+  const online = isServerOnline();
   const [deleting, setDeleting] = useState(false);
   const [deleted, setDeleted] = useState(false);
 
@@ -234,13 +236,13 @@ export default function AdminPanel({ session, onLogout }: Props) {
                             width: 8,
                             height: 8,
                             borderRadius: "50%",
-                            background: "#10b981",
-                            boxShadow: "0 0 8px #10b981",
+                            background: online ? "#10b981" : "#ef4444",
+                            boxShadow: `0 0 8px ${online ? "#10b981" : "#ef4444"}`,
                             display: "inline-block",
                           }}
                         />
-                        <span style={{ color: "#10b981", fontFamily: "Rajdhani", fontWeight: 700, fontSize: "0.875rem" }}>
-                          ВКЛЮЧЕН
+                        <span style={{ color: online ? "#10b981" : "#ef4444", fontFamily: "Rajdhani", fontWeight: 700, fontSize: "0.875rem" }}>
+                          {online ? "ВКЛЮЧЕН" : "ВЫКЛЮЧЕН"}
                         </span>
                       </span>
                     </td>

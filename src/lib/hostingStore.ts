@@ -1,14 +1,16 @@
 // Глобальное хранилище состояния хостинга (localStorage)
 
 export const FREE_SERVER = {
-  id: "#328070",
-  status: "ВКЛЮЧЕН" as const,
-  tariff: "GTA SAMP/CRMP - FREE (1000 слотов)",
+  id: "#328676",
+  tariff: "GTA SAMP/CRMP - FREE",
+  gameVersion: "SAMP 0.3.7",
   ip: "188.127.241.8:1311",
+  slots: 1000,
 };
 
 const KEY_SERVER = "ch_server_claimed";
 const KEY_OWNER = "ch_server_owner";
+const KEY_POWER = "ch_server_power"; // "on" | "off"
 
 export type Session = { role: "user" | "admin"; login: string } | null;
 
@@ -37,11 +39,14 @@ export function getServerOwner(): string | null {
 export function claimServer(login: string): void {
   localStorage.setItem(KEY_SERVER, "1");
   localStorage.setItem(KEY_OWNER, login);
+  // Изначально сервер ВЫКЛЮЧЕН
+  localStorage.setItem(KEY_POWER, "off");
 }
 
 export function releaseServer(): void {
   localStorage.removeItem(KEY_SERVER);
   localStorage.removeItem(KEY_OWNER);
+  localStorage.removeItem(KEY_POWER);
 }
 
 export function getUserServer(login: string) {
@@ -49,4 +54,13 @@ export function getUserServer(login: string) {
     return FREE_SERVER;
   }
   return null;
+}
+
+// --- Power state (ВКЛ/ВЫКЛ) ---
+export function isServerOnline(): boolean {
+  return localStorage.getItem(KEY_POWER) === "on";
+}
+
+export function setServerPower(on: boolean): void {
+  localStorage.setItem(KEY_POWER, on ? "on" : "off");
 }
