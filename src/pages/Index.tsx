@@ -1,18 +1,32 @@
 import { useState } from "react";
 import Icon from "@/components/ui/icon";
 import AuthModal from "@/components/AuthModal";
-
-const REGISTER_URL = "https://functions.poehali.dev/35e30c8a-8e57-4ad3-a914-413e3a6e9657";
+import UserDashboard from "@/components/UserDashboard";
+import AdminPanel from "@/components/AdminPanel";
+import { type Session } from "@/lib/hostingStore";
 
 const Index = () => {
-  const [modal, setModal] = useState<{ open: boolean; tab: "login" | "register"; plan?: string }>({
-    open: false,
-    tab: "login",
-  });
+  const [session, setSession] = useState<Session>(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
-  const openLogin = () => setModal({ open: true, tab: "login" });
-  const openRegister = (plan?: string) => setModal({ open: true, tab: "register", plan });
-  const closeModal = () => setModal((m) => ({ ...m, open: false }));
+  const openLogin = () => setModalOpen(true);
+  const openRegister = () => setModalOpen(true);
+  const closeModal = () => setModalOpen(false);
+
+  const handleLoginSuccess = (s: Session) => {
+    setSession(s);
+    setModalOpen(false);
+  };
+
+  const handleLogout = () => setSession(null);
+
+  // Роутинг по сессии
+  if (session?.role === "admin") {
+    return <AdminPanel session={session} onLogout={handleLogout} />;
+  }
+  if (session) {
+    return <UserDashboard session={session} onLogout={handleLogout} />;
+  }
 
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--cyber-bg)", color: "#e2e8f0" }}>
@@ -465,7 +479,7 @@ const Index = () => {
                 </ul>
 
                 <button
-                  onClick={() => openRegister(plan.name)}
+                  onClick={() => openRegister()}
                   className={plan.featured ? "btn-primary" : "btn-outline"}
                   style={{
                     display: "block",
@@ -677,11 +691,9 @@ const Index = () => {
       </footer>
 
       <AuthModal
-        isOpen={modal.open}
+        isOpen={modalOpen}
         onClose={closeModal}
-        defaultTab={modal.tab}
-        planName={modal.plan}
-        registerUrl={REGISTER_URL}
+        onLoginSuccess={handleLoginSuccess}
       />
     </div>
   );
