@@ -1,6 +1,19 @@
+import { useState } from "react";
 import Icon from "@/components/ui/icon";
+import AuthModal from "@/components/AuthModal";
+
+const REGISTER_URL = "https://functions.poehali.dev/35e30c8a-8e57-4ad3-a914-413e3a6e9657";
 
 const Index = () => {
+  const [modal, setModal] = useState<{ open: boolean; tab: "login" | "register"; plan?: string }>({
+    open: false,
+    tab: "login",
+  });
+
+  const openLogin = () => setModal({ open: true, tab: "login" });
+  const openRegister = (plan?: string) => setModal({ open: true, tab: "register", plan });
+  const closeModal = () => setModal((m) => ({ ...m, open: false }));
+
   return (
     <div className="min-h-screen" style={{ backgroundColor: "var(--cyber-bg)", color: "#e2e8f0" }}>
       {/* HEADER */}
@@ -56,13 +69,13 @@ const Index = () => {
             ))}
           </nav>
 
-          <a
-            href="#"
+          <button
+            onClick={openLogin}
             className="btn-primary px-5 py-2 rounded-lg text-sm relative z-10"
-            style={{ fontFamily: "Rajdhani, sans-serif", fontWeight: 600, letterSpacing: "0.08em", textDecoration: "none" }}
+            style={{ fontFamily: "Rajdhani, sans-serif", fontWeight: 600, letterSpacing: "0.08em" }}
           >
             Личный кабинет
-          </a>
+          </button>
         </div>
       </header>
 
@@ -127,13 +140,13 @@ const Index = () => {
             >
               Выбрать тариф
             </a>
-            <a
-              href="#"
+            <button
+              onClick={() => openRegister()}
               className="btn-outline px-8 py-3.5 rounded-xl text-base"
-              style={{ fontFamily: "Rajdhani, sans-serif", fontWeight: 700, letterSpacing: "0.08em", textDecoration: "none" }}
+              style={{ fontFamily: "Rajdhani, sans-serif", fontWeight: 700, letterSpacing: "0.08em" }}
             >
               Тестовый период
-            </a>
+            </button>
           </div>
 
           <div
@@ -451,11 +464,12 @@ const Index = () => {
                   ))}
                 </ul>
 
-                <a
-                  href="#"
+                <button
+                  onClick={() => openRegister(plan.name)}
                   className={plan.featured ? "btn-primary" : "btn-outline"}
                   style={{
                     display: "block",
+                    width: "100%",
                     textAlign: "center",
                     padding: "0.75rem",
                     borderRadius: "0.75rem",
@@ -463,13 +477,13 @@ const Index = () => {
                     fontWeight: 700,
                     fontSize: "1rem",
                     letterSpacing: "0.08em",
-                    textDecoration: "none",
                     position: "relative",
                     zIndex: 1,
+                    cursor: "pointer",
                   }}
                 >
                   Заказать
-                </a>
+                </button>
 
                 {plan.featured && (
                   <div
@@ -603,13 +617,13 @@ const Index = () => {
                 >
                   Выбрать тариф
                 </a>
-                <a
-                  href="#"
+                <button
+                  onClick={() => openRegister()}
                   className="btn-outline px-8 py-3.5 rounded-xl text-base"
-                  style={{ fontFamily: "Rajdhani, sans-serif", fontWeight: 700, letterSpacing: "0.08em", textDecoration: "none" }}
+                  style={{ fontFamily: "Rajdhani, sans-serif", fontWeight: 700, letterSpacing: "0.08em", cursor: "pointer" }}
                 >
                   Тестовый период
-                </a>
+                </button>
               </div>
             </div>
           </div>
@@ -661,6 +675,14 @@ const Index = () => {
           </div>
         </div>
       </footer>
+
+      <AuthModal
+        isOpen={modal.open}
+        onClose={closeModal}
+        defaultTab={modal.tab}
+        planName={modal.plan}
+        registerUrl={REGISTER_URL}
+      />
     </div>
   );
 };

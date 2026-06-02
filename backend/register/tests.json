@@ -1,0 +1,30 @@
+{
+  "tests": [
+    {
+      "name": "OPTIONS preflight",
+      "method": "OPTIONS",
+      "path": "/",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Успешная регистрация",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "name": "Тест Юзер",
+        "email": "test@cyberhost.ru",
+        "password": "test123",
+        "telegram": "@testuser",
+        "game": "Minecraft"
+      },
+      "expectedStatus": 200
+    },
+    {
+      "name": "Ошибка — пустые поля",
+      "method": "POST",
+      "path": "/",
+      "body": { "name": "", "email": "", "password": "" },
+      "expectedStatus": 400
+    }
+  ]
+}
